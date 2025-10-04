@@ -1,0 +1,50 @@
+# Windows Gateway - Acts as mTLS proxy for Windows services
+# This gateway handles both ingress (Windows->Linux) and egress (Linux->Windows) traffic
+# providing mTLS termination and origination for Windows workloads
+
+# Use ClusterIP service since this is for internal mesh communication
+service:
+  type: ClusterIP
+  ports:
+  - name: status-port
+    port: 15021
+    protocol: TCP
+    targetPort: 15021
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080
+  - name: https
+    port: 8443
+    protocol: TCP
+    targetPort: 8443
+  - name: http-plain
+    port: 8081
+    protocol: TCP
+    targetPort: 8081
+
+# Label the gateway for specific selection
+labels:
+  istio: windows-gateway
+  
+# Resource constraints for Windows proxy gateway
+resources:
+  requests:
+    cpu: 50m
+    memory: 64Mi
+  limits:
+    cpu: 500m
+    memory: 256Mi
+
+# Single replica for POC - scale up for production
+replicaCount: 1
+autoscaling:
+  enabled: false
+
+# Ensure proper sidecar injection for mTLS capabilities
+podAnnotations:
+  prometheus.io/port: "15020"
+  prometheus.io/scrape: "true"
+  prometheus.io/path: "/stats/prometheus"
+  inject.istio.io/templates: "gateway"
+  sidecar.istio.io/inject: "true"

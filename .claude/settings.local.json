@@ -29,7 +29,8 @@
       "Bash(./delete.sh)",
       "Bash(./poc1/delete.sh:*)",
       "Bash(kubectl logs:*)",
-      "Bash(kubectl exec:*)"
+      "Bash(kubectl exec:*)",
+      "Bash(kubectl delete:*)"
     ],
     "deny": [],
     "ask": []

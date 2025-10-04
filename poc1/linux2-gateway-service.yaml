@@ -1,0 +1,18 @@
+# Create a linux2-gateway service that points to the Windows gateway
+# Windows services can call linux2-gateway:8080 to reach linux2 service
+apiVersion: v1
+kind: Service
+metadata:
+  name: linux2-gateway
+  namespace: poc1
+  labels:
+    app: linux2-gateway
+    managed-by: windows-gateway-pattern
+spec:
+  selector:
+    istio: windows-gateway  # Points to Windows gateway pods
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8081  # Point to plain HTTP port for Windows services
+    protocol: TCP

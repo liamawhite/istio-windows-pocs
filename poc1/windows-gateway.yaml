@@ -1,0 +1,27 @@
+# Windows Gateway Configuration
+# This gateway accepts mTLS traffic from mesh services and forwards plain HTTP to Windows services
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: windows-gateway
+  namespace: poc1
+spec:
+  selector:
+    istio: windows-gateway
+  servers:
+  # mTLS port for mesh services (Linux services with sidecars)
+  - port:
+      number: 8080
+      name: https-mtls
+      protocol: HTTPS
+    tls:
+      mode: ISTIO_MUTUAL  # Accept mTLS from mesh services
+    hosts:
+    - "*"
+  # Plain HTTP port for Windows services (no sidecars)
+  - port:
+      number: 8081
+      name: http-plain
+      protocol: HTTP
+    hosts:
+    - "*"

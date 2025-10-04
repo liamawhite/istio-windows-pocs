@@ -1,0 +1,19 @@
+# VirtualService for Windows Gateway
+# Handles mTLS termination/origination for both Windows and Linux services
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: windows-gateway-vs
+  namespace: poc1
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - windows-gateway
+  http:
+  # Catch-all route - EnvoyFilter will handle ALL routing decisions dynamically
+  - route:
+    - destination:
+        host: windows.poc1.svc.cluster.local  # Default fallback
+        port:
+          number: 8080

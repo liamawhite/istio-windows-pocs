@@ -1,0 +1,18 @@
+# Create a mesh.linux service that points to the Windows gateway
+# Windows services can call mesh.linux:8080 to reach linux service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mesh-linux
+  namespace: poc1
+  labels:
+    app: mesh-linux
+    managed-by: windows-gateway-pattern
+spec:
+  selector:
+    istio: windows-gateway  # Points to Windows gateway pods
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8081  # Point to plain HTTP port for Windows services
+    protocol: TCP

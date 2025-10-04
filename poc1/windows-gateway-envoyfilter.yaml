@@ -1,0 +1,69 @@
+# EnvoyFilter for mesh- prefix service routing  
+# Supports: mesh-service, mesh-service.namespace, mesh-service.namespace.svc, mesh-service.namespace.svc.cluster.local
+apiVersion: networking.istio.io/v1alpha3
+kind: EnvoyFilter
+metadata:
+  name: windows-gateway-service-rewriter
+  namespace: poc1
+spec:
+  workloadSelector:
+    labels:
+      istio: windows-gateway
+  configPatches:
+  - applyTo: HTTP_FILTER
+    match:
+      context: GATEWAY
+      listener:
+        filterChain:
+          filter:
+            name: envoy.filters.network.http_connection_manager
+        portNumber: 8081  # Only apply to plain HTTP port
+    patch:
+      operation: INSERT_BEFORE
+      value:
+        name: envoy.filters.http.lua
+        typed_config:
+          "@type": type.googleapis.com/envoy.extensions.filters.http.lua.v3.Lua
+          inline_code: |
+            function envoy_on_request(request_handle)
+              local authority = request_handle:headers():get(":authority")
+              if authority then
+                local service_name, namespace, port
+                
+                -- Pattern 1: mesh-{service}.{namespace}.svc.cluster.local:{port} → {service}.{namespace}.svc.cluster.local:{port}
+                service_name, namespace, port = string.match(authority, "^mesh%-([a-zA-Z0-9%-]+)%.([a-zA-Z0-9%-]+)%.svc%.cluster%.local:(%d+)$")
+                if service_name and namespace and port then
+                  local new_authority = service_name .. "." .. namespace .. ".svc.cluster.local:" .. port
+                  request_handle:headers():replace(":authority", new_authority)
+                  request_handle:logInfo("Mesh routing (full): " .. authority .. " → " .. new_authority)
+                  return
+                end
+                
+                -- Pattern 2: mesh-{service}.{namespace}.svc:{port} → {service}.{namespace}.svc.cluster.local:{port}
+                service_name, namespace, port = string.match(authority, "^mesh%-([a-zA-Z0-9%-]+)%.([a-zA-Z0-9%-]+)%.svc:(%d+)$")
+                if service_name and namespace and port then
+                  local new_authority = service_name .. "." .. namespace .. ".svc.cluster.local:" .. port
+                  request_handle:headers():replace(":authority", new_authority)
+                  request_handle:logInfo("Mesh routing (svc): " .. authority .. " → " .. new_authority)
+                  return
+                end
+                
+                -- Pattern 3: mesh-{service}.{namespace}:{port} → {service}.{namespace}.svc.cluster.local:{port}
+                service_name, namespace, port = string.match(authority, "^mesh%-([a-zA-Z0-9%-]+)%.([a-zA-Z0-9%-]+):(%d+)$")
+                if service_name and namespace and port then
+                  local new_authority = service_name .. "." .. namespace .. ".svc.cluster.local:" .. port
+                  request_handle:headers():replace(":authority", new_authority)
+                  request_handle:logInfo("Mesh routing (ns): " .. authority .. " → " .. new_authority)
+                  return
+                end
+                
+                -- Pattern 4: mesh-{service}:{port} → {service}.poc1.svc.cluster.local:{port} (default namespace)
+                service_name, port = string.match(authority, "^mesh%-([a-zA-Z0-9%-]+):(%d+)$")
+                if service_name and port then
+                  local new_authority = service_name .. ".poc1.svc.cluster.local:" .. port
+                  request_handle:headers():replace(":authority", new_authority)
+                  request_handle:logInfo("Mesh routing (default ns): " .. authority .. " → " .. new_authority)
+                  return
+                end
+              end
+            end

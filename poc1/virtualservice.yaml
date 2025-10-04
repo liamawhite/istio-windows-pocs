@@ -36,7 +36,7 @@ spec:
       uri: /
     route:
     - destination:
-        host: windows.poc1.svc.cluster.local
+        host: poc1-windows-gateway.poc1.svc.cluster.local
         port:
           number: 8080
   - match:
@@ -46,7 +46,27 @@ spec:
       uri: /
     route:
     - destination:
-        host: windows.poc1.svc.cluster.local
+        host: poc1-windows-gateway.poc1.svc.cluster.local
+        port:
+          number: 8080
+  - match:
+    - uri:
+        prefix: /linux2/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: linux2.poc1.svc.cluster.local
+        port:
+          number: 8080
+  - match:
+    - uri:
+        exact: /linux2
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: linux2.poc1.svc.cluster.local
         port:
           number: 8080
   - match:

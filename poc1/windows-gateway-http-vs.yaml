@@ -1,0 +1,19 @@
+# VirtualService for Windows Gateway HTTP port (8081)
+# Handles plain HTTP traffic from Windows services to Linux services
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: windows-gateway-http-vs
+  namespace: poc1
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - windows-gateway
+  http:
+  # Route all HTTP traffic on port 8081 to Linux service with mTLS origination
+  - route:
+    - destination:
+        host: linux.poc1.svc.cluster.local
+        port:
+          number: 8080
