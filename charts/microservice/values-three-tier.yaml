@@ -1,0 +1,114 @@
+# Three-tier deployment example (frontend, backend, database)
+# Usage: helm install my-topology ./chart/ -f values-three-tier.yaml
+
+# Global chart configuration
+# nameOverride: Override chart name in resource names (e.g., "proxy" -> my-topology-proxy-service-a)
+nameOverride: ""
+# fullnameOverride: Complete control over base name (e.g., "topology" -> topology-service-a)
+fullnameOverride: ""
+# imagePullSecrets: Secrets for private registries  
+imagePullSecrets: []
+
+# Deploy to microservice namespace
+namespace:
+  create: true
+  name: "microservices"
+
+# Default values for all services
+defaults:
+  replicaCount: 1
+
+  image:
+    repository: ghcr.io/liamawhite/microservice
+    pullPolicy: IfNotPresent
+    tag: "latest"
+
+  serviceAccount:
+    create: true
+    automount: true
+    name: ""
+
+
+
+  securityContext: {}
+
+  service:
+    type: ClusterIP
+
+  resources:
+    requests:
+      memory: "128Mi"
+      cpu: "100m"
+    limits:
+      memory: "256Mi"
+      cpu: "200m"
+
+  livenessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 30
+    periodSeconds: 10
+
+  readinessProbe:
+    httpGet:
+      path: /health
+      port: http
+    initialDelaySeconds: 5
+    periodSeconds: 5
+
+  autoscaling:
+    enabled: false
+    minReplicas: 1
+    maxReplicas: 10
+    targetCPUUtilizationPercentage: 70
+
+
+
+
+  config:
+    timeout: "30s"
+    logLevel: "info"
+    logFormat: "json"
+
+# Three-tier services configuration
+services:
+  # Frontend - Entry point service (web tier)
+  - name: "frontend"
+    config:
+      serviceName: "frontend"
+      port: 8080
+    service:
+      port: 8080
+    autoscaling:
+      enabled: false
+    
+  # Backend - Application logic service (app tier)
+  - name: "backend"
+    config:
+      serviceName: "backend"
+      port: 8081
+    service:
+      port: 8081
+    resources:
+      requests:
+        memory: "256Mi"
+        cpu: "200m"
+      limits:
+        memory: "512Mi"
+        cpu: "400m"
+    autoscaling:
+      enabled: false
+    
+  # Database - Data storage service (data tier)
+  - name: "database"
+    config:
+      serviceName: "database"
+      port: 8082
+    service:
+      port: 8082
+    autoscaling:
+      enabled: true
+      minReplicas: 2
+      maxReplicas: 5
+      targetCPUUtilizationPercentage: 60

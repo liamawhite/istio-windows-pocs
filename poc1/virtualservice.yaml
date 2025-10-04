@@ -1,0 +1,59 @@
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: poc1-vs
+  namespace: poc1
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - poc1-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /linux/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: linux.poc1.svc.cluster.local
+        port:
+          number: 8080
+  - match:
+    - uri:
+        exact: /linux
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: linux.poc1.svc.cluster.local
+        port:
+          number: 8080
+  - match:
+    - uri:
+        prefix: /windows/
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: windows.poc1.svc.cluster.local
+        port:
+          number: 8080
+  - match:
+    - uri:
+        exact: /windows
+    rewrite:
+      uri: /
+    route:
+    - destination:
+        host: windows.poc1.svc.cluster.local
+        port:
+          number: 8080
+  - match:
+    - uri:
+        exact: /
+    route:
+    - destination:
+        host: linux.poc1.svc.cluster.local
+        port:
+          number: 8080

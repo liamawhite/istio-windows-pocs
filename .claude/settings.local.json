@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(helm repo add:*)",
+      "Bash(helm repo:*)",
+      "Bash(helm pull:*)",
+      "Bash(tar:*)",
+      "Bash(./setup-clusters.sh:*)",
+      "Bash(kind get:*)",
+      "Bash(kind delete clusters:*)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "Bash(./poc1/create.sh:*)",
+      "Bash(kubectl rollout restart:*)",
+      "Bash(kubectl get pod:*)",
+      "Bash(./delete-clusters.sh:*)",
+      "Bash(./create-clusters.sh:*)",
+      "Bash(helm upgrade:*)",
+      "Bash(kubectl describe:*)",
+      "Bash(curl:*)",
+      "Bash(kubectl get:*)",
+      "Bash(kubectl apply:*)",
+      "Bash(docker exec:*)",
+      "WebSearch",
+      "WebFetch(domain:istio.io)",
+      "Bash(kubectl wait:*)",
+      "Bash(docker network inspect:*)",
+      "WebFetch(domain:github.com)",
+      "Bash(kubectl patch:*)",
+      "Bash(./delete.sh)",
+      "Bash(./poc1/delete.sh:*)",
+      "Bash(kubectl logs:*)",
+      "Bash(kubectl exec:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

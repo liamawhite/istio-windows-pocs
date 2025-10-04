@@ -1,0 +1,26 @@
+# DestinationRule to enforce mTLS for Windows service
+#
+# Why this is needed:
+# - The mesh has a STRICT PeerAuthentication policy in istio-system namespace
+# - However, STRICT mode only enforces mTLS between services that BOTH have sidecars
+# - Windows service has no sidecar (sidecar.istio.io/inject: "false")
+# - Linux service has a sidecar and would normally fall back to plaintext when calling Windows
+# - This DestinationRule forces the Linux sidecar to ALWAYS attempt mTLS to Windows
+# - Since Windows can't handle mTLS (no sidecar), the connection fails as expected
+# - This demonstrates proper security enforcement in mixed sidecar/non-sidecar environments
+#
+# Without this DestinationRule:
+#   curl http://localhost:40080/linux/proxy/windows:8080 → SUCCESS (fallback to plaintext)
+# With this DestinationRule:
+#   curl http://localhost:40080/linux/proxy/windows:8080 → FAIL (503 TLS error)
+#
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: windows-tls-required
+  namespace: poc1
+spec:
+  host: windows.poc1.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL  # Force mTLS even though target has no sidecar
