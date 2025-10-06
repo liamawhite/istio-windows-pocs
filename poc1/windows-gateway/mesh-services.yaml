@@ -1,0 +1,41 @@
+# Create mesh.linux service that points to the Windows gateway
+# Windows services can call mesh.linux:8080 to reach linux service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mesh-linux
+  namespace: windows
+  labels:
+    app: mesh-linux
+    managed-by: windows-gateway-pattern
+spec:
+  selector:
+    app.kubernetes.io/component: windows
+    app.kubernetes.io/instance: poc1-windows-gateway
+    app.kubernetes.io/name: windows
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP
+---
+# Create mesh.linux2 service that points to the Windows gateway
+# Windows services can call mesh.linux2:8080 to reach linux2 service
+apiVersion: v1
+kind: Service
+metadata:
+  name: mesh-linux2
+  namespace: windows
+  labels:
+    app: mesh-linux2
+    managed-by: windows-gateway-pattern
+spec:
+  selector:
+    app.kubernetes.io/component: windows
+    app.kubernetes.io/instance: poc1-windows-gateway
+    app.kubernetes.io/name: windows
+  ports:
+  - name: http
+    port: 8080
+    targetPort: 8080
+    protocol: TCP

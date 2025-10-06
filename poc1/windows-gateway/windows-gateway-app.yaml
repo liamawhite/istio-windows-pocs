@@ -1,0 +1,87 @@
+---
+# Windows Gateway - WITH Istio sidecar for mTLS proxy
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: windows-gateway
+  namespace: windows
+  labels:
+    app: windows-gateway
+    component: gateway
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: windows-gateway-service
+  namespace: windows
+  labels:
+    app: windows-gateway
+    component: gateway
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8080
+      targetPort: http
+      protocol: TCP
+      name: http
+  selector:
+    app: windows-gateway
+    istio: windows-gateway
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: windows-gateway
+  namespace: windows
+  labels:
+    app: windows-gateway
+    istio: windows-gateway
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: windows-gateway
+      istio: windows-gateway
+  template:
+    metadata:
+      labels:
+        app: windows-gateway
+        istio: windows-gateway
+      annotations:
+        # Enable Istio sidecar injection for the gateway
+        sidecar.istio.io/inject: "true"
+    spec:
+      serviceAccountName: windows-gateway
+      containers:
+        - name: microservice
+          image: "ghcr.io/liamawhite/microservice:latest"
+          imagePullPolicy: IfNotPresent
+          args:
+            - "-port=8080"
+            - "-service-name=windows-gateway"
+            - "-timeout=30s"
+            - "-log-level=info"
+            - "-log-format=json"
+          ports:
+            - name: http
+              containerPort: 8080
+              protocol: TCP
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: http
+            initialDelaySeconds: 5
+            periodSeconds: 5
+          resources:
+            requests:
+              memory: "128Mi"
+              cpu: "100m"
+            limits:
+              memory: "256Mi"
+              cpu: "200m"

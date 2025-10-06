@@ -1,0 +1,88 @@
+---
+# Gateway to handle outbound traffic from windows gateway to other services
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: windows-outbound-gateway
+  namespace: windows
+spec:
+  selector:
+    app: windows
+    istio: windows
+  servers:
+  - port:
+      number: 8081
+      name: http
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+# VirtualService to route outbound traffic from windows gateway to all services
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: windows-outbound-routing
+  namespace: windows
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - windows-outbound-gateway
+  http:
+  - match:
+      - headers:
+          host:
+            prefix: "linux.linux."
+    route:
+    - destination:
+        host: "linux.linux.svc.cluster.local"
+        port:
+          number: 8080
+  - match:
+      - headers:
+          host:
+            prefix: "linux2.linux2."
+    route:
+    - destination:
+        host: "linux2.linux2.svc.cluster.local"
+        port:
+          number: 8080
+  - match:
+    - headers:
+        host:
+          prefix: "example.com"
+    route:
+    - destination:
+        host: "example.com"
+        port:
+          number: 443
+---
+# ServiceEntry for external services like example.com
+apiVersion: networking.istio.io/v1beta1
+kind: ServiceEntry
+metadata:
+  name: external-services
+  namespace: windows
+spec:
+  hosts:
+  - example.com
+  ports:
+  - number: 443
+    name: https
+    protocol: HTTPS
+  location: MESH_EXTERNAL
+  resolution: DNS
+---
+# DestinationRule for TLS origination to external services
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: external-services-tls
+  namespace: windows
+spec:
+  host: example.com
+  trafficPolicy:
+    tls:
+      mode: SIMPLE  # TLS origination for external services
+---
+

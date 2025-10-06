@@ -1,0 +1,51 @@
+---
+# Windows mTLS Gateway - Pure Envoy Gateway for mTLS termination/origination
+apiVersion: networking.istio.io/v1beta1
+kind: Gateway
+metadata:
+  name: windows-mtls-gateway
+  namespace: windows
+spec:
+  selector:
+    istio: windows-gateway  # Use dedicated Windows gateway
+  servers:
+  - port:
+      number: 8080
+      name: http
+      protocol: HTTP
+    hosts:
+    - windows.windows.svc.cluster.local
+---
+# VirtualService to route traffic through Windows Gateway to Windows Service
+apiVersion: networking.istio.io/v1beta1
+kind: VirtualService
+metadata:
+  name: windows-service-routing
+  namespace: windows
+spec:
+  hosts:
+  - windows.windows.svc.cluster.local
+  gateways:
+  - windows-mtls-gateway
+  - mesh  # Allow mesh traffic
+  http:
+  - match:
+    - uri:
+        prefix: /
+    route:
+    - destination:
+        host: windows-app.windows.svc.cluster.local
+        port:
+          number: 8080
+---
+# DestinationRule for Windows Service (plain HTTP, no TLS)
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: windows-service-dr
+  namespace: windows
+spec:
+  host: windows-app.windows.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: DISABLE  # Plain HTTP to Windows service

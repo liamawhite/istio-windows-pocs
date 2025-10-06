@@ -1,7 +1,7 @@
 apiVersion: networking.istio.io/v1beta1
 kind: Gateway
 metadata:
-  name: poc1-gateway
+  name: poc2-gateway
   namespace: istio-ingress
 spec:
   selector:

@@ -4,20 +4,19 @@ apiVersion: networking.istio.io/v1alpha3
 kind: EnvoyFilter
 metadata:
   name: windows-gateway-service-rewriter
-  namespace: poc1
+  namespace: windows
 spec:
   workloadSelector:
     labels:
-      istio: windows-gateway
+      app.kubernetes.io/instance: poc1-windows-gateway
   configPatches:
   - applyTo: HTTP_FILTER
     match:
-      context: GATEWAY
+      context: SIDECAR_OUTBOUND
       listener:
         filterChain:
           filter:
             name: envoy.filters.network.http_connection_manager
-        portNumber: 8081  # Only apply to plain HTTP port
     patch:
       operation: INSERT_BEFORE
       value:

@@ -1,0 +1,14 @@
+# Values for Windows Gateway to expose as "windows" service
+# Override the name to be "windows" 
+# This allows traffic to reach windows.windows.svc.cluster.local
+name: "windows"
+
+# Service configuration
+service:
+  type: ClusterIP
+  clusterIP: "10.96.100.100"  # Static IP for consistent DNS hijacking
+  ports:
+  - name: http
+    port: 8080
+    protocol: TCP
+    targetPort: 8080

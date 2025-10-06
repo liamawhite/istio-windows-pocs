@@ -1,13 +1,13 @@
 apiVersion: networking.istio.io/v1beta1
 kind: VirtualService
 metadata:
-  name: poc1-vs
+  name: poc2-vs
   namespace: istio-ingress
 spec:
   hosts:
   - "*"
   gateways:
-  - poc1-gateway
+  - poc2-gateway
   http:
   - match:
     - uri:
@@ -34,6 +34,7 @@ spec:
         prefix: /windows/
     rewrite:
       uri: /
+      authority: windows.windows.svc.cluster.local
     route:
     - destination:
         host: windows.windows.svc.cluster.local
@@ -44,6 +45,7 @@ spec:
         exact: /windows
     rewrite:
       uri: /
+      authority: windows.windows.svc.cluster.local
     route:
     - destination:
         host: windows.windows.svc.cluster.local

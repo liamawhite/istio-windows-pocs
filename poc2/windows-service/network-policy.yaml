@@ -1,0 +1,42 @@
+---
+# NetworkPolicy to isolate Windows Service
+# Only allows traffic from Windows Gateway, blocks all other access
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: windows-service-isolation
+  namespace: windows
+spec:
+  podSelector:
+    matchLabels:
+      app: windows-app
+      component: windows-app
+  policyTypes:
+  - Ingress
+  - Egress
+  ingress:
+  # Only allow traffic from Windows gateway pods
+  - from:
+    - podSelector:
+        matchLabels:
+          app: windows
+          istio: windows
+    ports:
+    - port: 8080
+      protocol: TCP
+  egress:
+  # Allow DNS resolution
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 53
+      protocol: TCP
+  # Allow traffic to Windows gateway only (for proxy requests)
+  - to:
+    - podSelector:
+        matchLabels:
+          app: windows
+          istio: windows
+    ports:
+    - port: 8081
+      protocol: TCP

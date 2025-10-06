@@ -30,7 +30,11 @@
       "Bash(./poc1/delete.sh:*)",
       "Bash(kubectl logs:*)",
       "Bash(kubectl exec:*)",
-      "Bash(kubectl delete:*)"
+      "Bash(kubectl delete:*)",
+      "Bash(./test.sh:*)",
+      "Bash(./poc1/test.sh:*)",
+      "Bash(sed:*)",
+      "Bash(find:*)"
     ],
     "deny": [],
     "ask": []
