@@ -12,8 +12,10 @@ spec:
   servers:
   - port:
       number: 8080
-      name: http
-      protocol: HTTP
+      name: https
+      protocol: HTTPS
+    tls:
+      mode: ISTIO_MUTUAL
     hosts:
     - windows.windows.svc.cluster.local
 ---
@@ -49,3 +51,16 @@ spec:
   trafficPolicy:
     tls:
       mode: DISABLE  # Disable mTLS for Windows app without sidecar
+---
+# DestinationRule for internal services to use mTLS
+apiVersion: networking.istio.io/v1beta1
+kind: DestinationRule
+metadata:
+  name: internal-services-mtls
+  namespace: windows
+spec:
+  host: windows.windows.svc.cluster.local
+  trafficPolicy:
+    tls:
+      mode: ISTIO_MUTUAL  # Use mTLS for internal service communication
+      sni: windows.windows.svc.cluster.local

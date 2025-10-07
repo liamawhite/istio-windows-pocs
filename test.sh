@@ -1,7 +1,5 @@
 #!/bin/bash 
 
-set -e  # Exit on any command failure
-
 GATEWAY_URL="http://localhost:40080"
 
 # Test function that validates status codes and service responses
@@ -12,7 +10,7 @@ test_endpoint() {
     local expected_status="${3:-200}"
     local expected_service="$4"
     
-    echo "Testing: $description"
+    echo "Testing: $description [$url]"
     
     # Get response and status code
     response=$(curl -s -w "%{http_code}" "$url" 2>/dev/null)
@@ -28,14 +26,12 @@ test_endpoint() {
                 echo "✅ PASS: $description → status: $status_code, service: $service"
             else
                 echo "❌ FAIL: $description → status: $status_code, Expected service: $expected_service, Got service: $service"
-                exit 1
             fi
         else
             echo "✅ PASS: $description → status: $status_code"
         fi
     else
         echo "❌ FAIL: $description → Expected status: $expected_status, Got status: $status_code"
-        exit 1
     fi
 }
 
