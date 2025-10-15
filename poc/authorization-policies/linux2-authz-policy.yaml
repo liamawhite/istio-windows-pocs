@@ -1,0 +1,24 @@
+---
+# AuthorizationPolicy for linux2 service
+# Only allows access from:
+# 1. linux service (in linux namespace)
+# 2. istio-ingress gateway
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: linux2-authz
+  namespace: linux2
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: microservice
+      app.kubernetes.io/component: linux2
+  rules:
+  # Allow access from linux service
+  - from:
+    - source:
+        principals: ["cluster.local/ns/linux/sa/linux"]
+  # Allow access from istio-ingress gateway
+  - from:
+    - source:
+        principals: ["cluster.local/ns/istio-ingress/sa/istio-ingress"]

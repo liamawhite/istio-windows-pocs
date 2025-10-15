@@ -46,11 +46,11 @@ test_endpoint "ingress -> windows" "$GATEWAY_URL/windows" 200 "windows"
 test_endpoint "ingress -> linux -> windows" "$GATEWAY_URL/linux/proxy/windows.windows.svc.cluster.local:8080" 200 "windows"
 test_endpoint "ingress -> linux -> linux2" "$GATEWAY_URL/linux/proxy/linux2.linux2.svc.cluster.local:8080" 200 "linux2"
 
-test_endpoint "ingress -> linux2 -> windows" "$GATEWAY_URL/linux2/proxy/windows.windows.svc.cluster.local:8080" 200 "windows"
+test_endpoint "ingress -> linux2 -> windows" "$GATEWAY_URL/linux2/proxy/windows.windows.svc.cluster.local:8080" 403
 test_endpoint "ingress -> linux2 -> linux" "$GATEWAY_URL/linux2/proxy/linux.linux.svc.cluster.local:8080" 200 "linux"
 
 test_endpoint "ingress -> windows -> linux" "$GATEWAY_URL/windows/proxy/linux.linux.svc.cluster.local:8081" 200 "linux"
-test_endpoint "ingress -> windows -> linux2" "$GATEWAY_URL/windows/proxy/linux2.linux2.svc.cluster.local:8081" 200 "linux2"
+test_endpoint "ingress -> windows -> linux2" "$GATEWAY_URL/windows/proxy/linux2.linux2.svc.cluster.local:8081" 403
 
 # external requests
 test_endpoint "ingress -> windows -> example.com" "$GATEWAY_URL/windows/proxy/example.com:8081" 200 ""

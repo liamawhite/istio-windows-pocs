@@ -1,0 +1,30 @@
+---
+# AuthorizationPolicy for windows-app service
+# Only allows access from:
+# 1. linux service (in linux namespace)
+# 2. istio-ingress gateway
+apiVersion: security.istio.io/v1beta1
+kind: AuthorizationPolicy
+metadata:
+  name: windows-authz
+  namespace: windows
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: windows
+      app.kubernetes.io/instance: "windows-gateway"
+  rules:
+  # Allow access from linux service
+  - from:
+    - source:
+        principals: ["cluster.local/ns/linux/sa/linux"]
+  # Allow access from istio-ingress gateway
+  - from:
+    - source:
+        principals: ["cluster.local/ns/istio-ingress/sa/istio-ingress"]
+  # Allow all requests to port 8081 (i.e. egress)
+  # NETWORK POLICIES MUSH BLOCK ALL OTHER ACCESS THAT ISNT THE WINDOWS APP
+  # Otherwise, anything can essentially pretend to be the windows application
+  - to:
+    - operation:
+        ports: ["8081"]
