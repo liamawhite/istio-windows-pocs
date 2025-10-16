@@ -61,7 +61,7 @@ echo "✅ Verifying Istio installation on $CLUSTER_NAME..."
 kubectl get pods -n istio-system
 kubectl get pods -n istio-ingress
 kubectl wait --for=condition=ready pod -l app=istiod -n istio-system --timeout=300s
-kubectl wait --for=condition=ready pod -l app=istio-gateway -n istio-ingress --timeout=300s
+kubectl wait --for=condition=ready pod -l app=istio-ingress -n istio-ingress --timeout=300s
 
 # Verify mTLS policy
 echo "🔒 Verifying strict mTLS policy..."
